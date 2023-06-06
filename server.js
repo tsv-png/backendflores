@@ -78,6 +78,39 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.delete("/usuario/:id", async (req, res) => {
+  const id = req.params.id;
+
+  try {
+    await Usuario.findByIdAndDelete(id);
+    res.send("Usuário excluído com sucesso");
+  } catch (error) {
+    res.status(500).send("Erro interno do servidor");
+  }
+});
+
+app.put("/usuario/:id", async (req, res) => {
+  const id = req.params.id;
+  const { nome, senha } = req.body;
+
+  try {
+    const usuario = await Usuario.findById(id);
+    if (!usuario) {
+      res.status(404).send("Usuário não encontrado");
+    } else {
+      const senhaCriptografada = bcrypt.hashSync(senha, 10);
+
+      usuario.nome = nome;
+      usuario.senha = senhaCriptografada;
+
+      await usuario.save();
+      res.send("Usuário atualizado com sucesso");
+    }
+  } catch (error) {
+    res.status(500).send("Erro interno do servidor");
+  }
+});
+
 app.listen("3004", () => {
   console.log("Servidor iniciado na porta 3004");
 });
